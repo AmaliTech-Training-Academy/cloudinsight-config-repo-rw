@@ -1,0 +1,105 @@
+server:
+  port: ${SERVER_PORT}
+
+# MongoDB Configuration
+spring:
+  data:
+    mongodb:
+      uri: ${MONGODB_URI}
+      auto-index-creation: true
+
+# Management & Health
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+
+# Eureka Client
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: ${SPRING_EUREKA_CLIENT_SERVICEURL_DEFAULTZONE}
+  instance:
+    prefer-ip-address: ${EUREKA_CLIENT_INSTANCE_PREFER_IP_ADDRESS}
+
+# Application Specific Configuration
+app:
+  # Phase One API Configuration
+  phase-one-api:
+    base-url: ${PHASE_ONE_API_URL}
+    auth-token: ${PHASE_ONE_API_TOKEN}
+    
+    timeout:
+      connect: ${PHASE_ONE_API_CONNECT_TIMEOUT:PT5S}
+      read: ${PHASE_ONE_API_READ_TIMEOUT:PT30S}
+      write: ${PHASE_ONE_API_WRITE_TIMEOUT:PT30S}
+    
+    connection-pool:
+      max-total: ${PHASE_ONE_API_MAX_CONNECTIONS:20}
+      max-per-route: ${PHASE_ONE_API_MAX_PER_ROUTE:10}
+      keep-alive: ${PHASE_ONE_API_KEEP_ALIVE:PT5M}
+    
+    retry:
+      max-attempts: ${PHASE_ONE_API_RETRY_ATTEMPTS:3}
+      initial-interval: ${PHASE_ONE_API_RETRY_INITIAL:PT1S}
+      multiplier: ${PHASE_ONE_API_RETRY_MULTIPLIER:2.0}
+      max-interval: ${PHASE_ONE_API_RETRY_MAX:PT10S}
+    
+    pagination:
+      batch-size: ${PHASE_ONE_API_BATCH_SIZE:1000}
+      max-retries: ${PHASE_ONE_API_PAGE_RETRIES:5}
+      delay-between-batches: ${PHASE_ONE_API_BATCH_DELAY:PT0.1S}
+  
+  # Data Ingestion Configuration
+  ingestion:
+    schedule: ${INGESTION_SCHEDULE:0 0 4 * * *}  # Daily at 4:00 AM UTC
+    batch-size: ${INGESTION_BATCH_SIZE:1000}
+    max-retries: ${INGESTION_MAX_RETRIES:12}
+    retry-interval-minutes: ${INGESTION_RETRY_INTERVAL:30}
+    buffer-hours: ${INGESTION_BUFFER_HOURS:4}
+
+# Profile-specific configurations
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+app:
+  ingestion:
+    schedule: ${INGESTION_SCHEDULE:0 */15 * * * *}  # Every 15 minutes for dev
+
+---
+spring:
+  config:
+    activate:
+      on-profile: test
+
+spring:
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/costs_db_test
+
+app:
+  phase-one-api:
+    base-url: http://localhost:8089  # WireMock for tests
+    auth-token: test-token
+
+eureka:
+  client:
+    enabled: false  # Disable Eureka for tests
+
+---
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+logging:
+  level:
+    root: WARN
+    '[com.cloudinsight.costs]': INFO
