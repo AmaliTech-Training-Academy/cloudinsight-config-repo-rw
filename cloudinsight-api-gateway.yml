@@ -48,6 +48,10 @@ spring:
                 regexp: 'lb://cloudinsight-user-service/(?<segment>.*)'
                 replacement: 'http://localhost:8080/${segment}'
                 stripVersion: AS_IN_REQUEST
+        - id: cloudinsight-costs-service
+          uri: lb://cloudinsight-costs-service
+          predicates:
+            - Path=/api/v1/costs/**
 
 eureka:
   client:
