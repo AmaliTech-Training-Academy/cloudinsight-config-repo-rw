@@ -30,7 +30,7 @@ spring:
               args:
                 name: Location
                 regexp: 'lb://cloudinsight-user-service/(?<segment>.*)'
-                replacement: 'http://localhost:8080/${segment}'
+                replacement: 'https://cip-api-gateway-latest.onrender.com/${segment}'
                 stripVersion: AS_IN_REQUEST
         - id: cloudinsight-user-service-oauth2-login
           uri: lb://cloudinsight-user-service
@@ -49,7 +49,7 @@ spring:
               args:
                 name: Location
                 regexp: 'lb://cloudinsight-user-service/(?<segment>.*)'
-                replacement: 'http://localhost:8080/${segment}'
+                replacement: 'https://cip-api-gateway-latest.onrender.com/${segment}'
                 stripVersion: AS_IN_REQUEST
         - id: cloudinsight-costs-service
           uri: lb://cloudinsight-costs-service
