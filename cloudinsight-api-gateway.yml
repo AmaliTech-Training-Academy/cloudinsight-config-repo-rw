@@ -10,8 +10,8 @@ spring:
           '[/**]':
             allowedOrigins:
               - http://localhost:3000
-              - https://app.cloudinsightpro.com
               - http://localhost:3001
+              - https://app.cloudinsightpro.com
             allowedMethods:
               - GET
               - POST
