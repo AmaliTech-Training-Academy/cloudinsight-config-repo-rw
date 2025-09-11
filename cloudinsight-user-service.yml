@@ -17,7 +17,7 @@ spring:
               - authorities
         provider:
           auth0:
-            issuer-uri: ${AUTH0_ISSUER_URI}
+            issuer-uri: ${OAUTH_ISSUER_URL}
   datasource:
     url: ${DB_URL}
     username: ${DB_USERNAME}
