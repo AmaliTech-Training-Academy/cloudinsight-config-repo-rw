@@ -12,6 +12,7 @@ spring:
               - http://localhost:3000
               - http://localhost:3001
               - https://app.cloudinsightpro.com
+              - https://cloudinsight-frontend-rw.vercel.app
             allowedMethods:
               - GET
               - POST
