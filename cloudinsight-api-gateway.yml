@@ -20,7 +20,15 @@ spring:
               - PUT
               - DELETE
               - OPTIONS
-            allowedHeaders: '*'
+            # This is the fix: specifying allowed headers instead of using the wildcard.
+            allowedHeaders:
+              - Content-Type
+              - X-Requested-With
+              - Accept
+              - Origin
+              - Access-Control-Request-Method
+              - Access-Control-Request-Headers
+              - Authorization
             allowCredentials: true
       routes:
         - id: cloudinsight-user-service-auth
