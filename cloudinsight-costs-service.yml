@@ -7,6 +7,43 @@ spring:
     mongodb:
       uri: ${MONGODB_URI}
       auto-index-creation: true
+  
+  # RabbitMQ Configuration
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
+    virtual-host: ${RABBITMQ_VHOST:/}
+    
+    # Connection settings
+    connection-timeout: 30000
+    
+    # Consumer settings
+    listener:
+      simple:
+        retry:
+          enabled: true
+          initial-interval: 2000ms
+          max-attempts: 3
+          max-interval: 10000ms
+          multiplier: 2.0
+        default-requeue-rejected: false # Send to DLQ instead of requeue
+        acknowledge-mode: auto
+        prefetch: 10
+    
+    # Producer settings  
+    publisher-confirms: true
+    publisher-returns: true
+    
+    # Template settings
+    template:
+      mandatory: true
+      retry:
+        enabled: true
+        initial-interval: 1000ms
+        max-attempts: 3
+        max-interval: 5000ms
 
 # Management & Health
 management:
@@ -32,28 +69,24 @@ app:
   phase-one-api:
     base-url: ${PHASE_ONE_API_URL}
     auth-token: ${PHASE_ONE_API_TOKEN}
-
     timeout:
       connect: ${PHASE_ONE_API_CONNECT_TIMEOUT:PT5S}
       read: ${PHASE_ONE_API_READ_TIMEOUT:PT30S}
       write: ${PHASE_ONE_API_WRITE_TIMEOUT:PT30S}
-
     connection-pool:
       max-total: ${PHASE_ONE_API_MAX_CONNECTIONS:20}
       max-per-route: ${PHASE_ONE_API_MAX_PER_ROUTE:10}
       keep-alive: ${PHASE_ONE_API_KEEP_ALIVE:PT5M}
-
     retry:
       max-attempts: ${PHASE_ONE_API_RETRY_ATTEMPTS:3}
       initial-interval: ${PHASE_ONE_API_RETRY_INITIAL:PT1S}
       multiplier: ${PHASE_ONE_API_RETRY_MULTIPLIER:2.0}
       max-interval: ${PHASE_ONE_API_RETRY_MAX:PT10S}
-
     pagination:
       batch-size: ${PHASE_ONE_API_BATCH_SIZE:1000}
       max-retries: ${PHASE_ONE_API_PAGE_RETRIES:5}
       delay-between-batches: ${PHASE_ONE_API_BATCH_DELAY:PT0.1S}
-
+  
   # Data Ingestion Configuration
   ingestion:
     schedule: ${INGESTION_SCHEDULE:0 0 4 * * *} # Daily at 4:00 AM UTC
@@ -68,7 +101,12 @@ spring:
   config:
     activate:
       on-profile: dev
-
+  # RabbitMQ dev settings
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    username: ${RABBITMQ_USERNAME:dev_user}
+    password: ${RABBITMQ_PASSWORD:dev_password}
+    
 app:
   ingestion:
     schedule: ${INGESTION_SCHEDULE:0 */15 * * * *} # Every 15 minutes for dev
@@ -78,12 +116,18 @@ spring:
   config:
     activate:
       on-profile: test
-
+  # RabbitMQ test settings (embedded or test container)
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5673}
+    username: test_user
+    password: test_password
+    
 app:
   phase-one-api:
     base-url: http://localhost:8089 # WireMock for tests
     auth-token: test-token
-
+    
 eureka:
   client:
     enabled: false # Disable Eureka for tests
@@ -93,7 +137,14 @@ spring:
   config:
     activate:
       on-profile: prod
-
+  # RabbitMQ prod settings
+  rabbitmq:
+    host: ${RABBITMQ_HOST}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME}
+    password: ${RABBITMQ_PASSWORD}
+    virtual-host: ${RABBITMQ_VHOST:/prod}
+    
 logging:
   level:
     root: WARN
