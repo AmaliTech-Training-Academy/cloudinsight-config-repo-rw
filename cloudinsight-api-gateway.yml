@@ -71,6 +71,10 @@ spring:
           uri: lb://cloudinsight-costs-service
           predicates:
             - Path=/api/v1/ingestion/trigger/**
+        - id: cloudinsight-costs-service-cost-injection
+          uri: lb://cloudinsight-costs-service
+          predicates:
+            - Path=/api/v1/cost-centers/**
 
 eureka:
   client:
