@@ -1,0 +1,27 @@
+server:
+  port: ${SERVER_PORT}
+
+# MongoDB Configuration
+spring:
+  data:
+    mongodb:
+      uri: ${MONGODB_URI}
+      auto-index-creation: true
+# Management & Health
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+
+# Eureka Client
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: ${SPRING_EUREKA_CLIENT_SERVICEURL_DEFAULTZONE}
+  instance:
+    prefer-ip-address: ${EUREKA_CLIENT_INSTANCE_PREFER_IP_ADDRESS}
+
