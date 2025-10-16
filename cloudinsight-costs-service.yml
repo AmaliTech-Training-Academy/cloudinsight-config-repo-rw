@@ -1,5 +1,10 @@
 server:
   port: ${SERVER_PORT}
+  cache:
+    type: redis
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT:6379}
 
 # MongoDB Configuration
 spring:
