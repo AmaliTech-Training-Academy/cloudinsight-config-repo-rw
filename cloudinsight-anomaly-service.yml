@@ -7,6 +7,24 @@ spring:
     mongodb:
       uri: ${MONGODB_URI}
       auto-index-creation: true
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer-group: cloudinsight-anomaly-group
+    topic-cost: cost.daily.metrics
+    topic-anomaly: anomaly.detected
+  model:
+    base-path: ./models
+    default-filename: isolation_forest.model
+    trees: 100
+    sample-size: 256
+    threshold: 0.75
+    window-days: 90
+    retrain-days: 7
+  storage:
+    serialize-format: java-serialization
+  executor:
+    thread-pool-size: 4
+
 # Management & Health
 management:
   endpoints:
