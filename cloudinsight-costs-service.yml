@@ -7,12 +7,13 @@ spring:
     mongodb:
       uri: ${MONGODB_URI}
       auto-index-creation: true
-  cache:
-    type: redis
     redis:
       host: ${REDIS_HOST}
       port: ${REDIS_PORT:6379}
-  
+
+  cache:
+    type: redis
+
   # RabbitMQ Configuration
   rabbitmq:
     host: ${RABBITMQ_HOST:localhost}
@@ -20,10 +21,10 @@ spring:
     username: ${RABBITMQ_USERNAME:guest}
     password: ${RABBITMQ_PASSWORD:guest}
     virtual-host: ${RABBITMQ_VHOST:/}
-    
+
     # Connection settings
     connection-timeout: 30000
-    
+
     # Consumer settings
     listener:
       simple:
@@ -36,11 +37,11 @@ spring:
         default-requeue-rejected: false # Send to DLQ instead of requeue
         acknowledge-mode: auto
         prefetch: 10
-    
-    # Producer settings  
+
+    # Producer settings
     publisher-confirms: true
     publisher-returns: true
-    
+
     # Template settings
     template:
       mandatory: true
@@ -91,7 +92,7 @@ app:
       batch-size: ${PHASE_ONE_API_BATCH_SIZE:1000}
       max-retries: ${PHASE_ONE_API_PAGE_RETRIES:5}
       delay-between-batches: ${PHASE_ONE_API_BATCH_DELAY:PT0.1S}
-  
+
   # Data Ingestion Configuration
   ingestion:
     schedule: ${INGESTION_SCHEDULE:0 0 4 * * *} # Daily at 4:00 AM UTC
@@ -106,17 +107,18 @@ spring:
   config:
     activate:
       on-profile: dev
-  cache:
-    type: redis
+  data:
     redis:
       host: ${REDIS_HOST}
       port: ${REDIS_PORT:6379}
+  cache:
+    type: redis
   # RabbitMQ dev settings
   rabbitmq:
     host: ${RABBITMQ_HOST:localhost}
     username: ${RABBITMQ_USERNAME:dev_user}
     password: ${RABBITMQ_PASSWORD:dev_password}
-    
+
 app:
   ingestion:
     schedule: ${INGESTION_SCHEDULE:0 */15 * * * *} # Every 15 minutes for dev
@@ -126,24 +128,24 @@ spring:
   config:
     activate:
       on-profile: test
-
-  cache:
-    type: redis
+  data:
     redis:
       host: ${REDIS_HOST}
       port: ${REDIS_PORT:6379}
+  cache:
+    type: redis
   # RabbitMQ test settings (embedded or test container)
   rabbitmq:
     host: ${RABBITMQ_HOST:localhost}
     port: ${RABBITMQ_PORT:5673}
     username: test_user
     password: test_password
-    
+
 app:
   phase-one-api:
     base-url: http://localhost:8089 # WireMock for tests
     auth-token: test-token
-    
+
 eureka:
   client:
     enabled: false # Disable Eureka for tests
@@ -160,7 +162,7 @@ spring:
     username: ${RABBITMQ_USERNAME}
     password: ${RABBITMQ_PASSWORD}
     virtual-host: ${RABBITMQ_VHOST:/prod}
-    
+
 logging:
   level:
     root: WARN
