@@ -8,15 +8,15 @@ spring:
       uri: ${MONGODB_URI}
       auto-index-creation: true
 
-  # Kafka Configuration - MUST be under spring.kafka for Spring Boot autoconfiguration
+  # Kafka Configuration
   kafka:
-    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
     
-    # Security Configuration (Required for Confluent Cloud)
+    # Security Configuration (for Confluent Cloud)
     properties:
-      security.protocol: ${KAFKA_SECURITY_PROTOCOL:PLAINTEXT}
-      sasl.mechanism: ${KAFKA_SASL_MECHANISM:PLAIN}
-      sasl.jaas.config: ${KAFKA_SASL_JAAS_CONFIG:}
+      security.protocol: SASL_SSL
+      sasl.mechanism: PLAIN
+      sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="${KAFKA_API_KEY}" password="${KAFKA_API_SECRET}";
       ssl.endpoint.identification.algorithm: https
     
     # Consumer Configuration
@@ -28,8 +28,10 @@ spring:
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       properties:
         spring.json.trusted.packages: "com.cloudinsight.events,com.cloudinsight.anomalyservicerw.events"
-        spring.json.value.default.type: com.cloudinsight.events.ServiceCostComputedEvent
+        spring.json.value.default.type: com.cloudinsight.anomalyservicerw.events.ServiceCostComputedEvent
       max-poll-records: 50
+      fetch-min-size: 1024
+      fetch-max-wait: 500ms
     
     # Producer Configuration (for publishing anomaly alerts)
     producer:
@@ -46,7 +48,7 @@ spring:
       ack-mode: manual
       concurrency: 3
 
-# Anomaly Detection Configuration (custom properties)
+# Anomaly Detection Configuration
 anomaly:
   kafka:
     topic-cost: service.cost.computed
@@ -96,8 +98,8 @@ logging:
   level:
     root: INFO
     com.cloudinsight.anomalyservicerw: DEBUG
-    org.springframework.kafka: INFO
-    org.apache.kafka: WARN
+    org.springframework.kafka: DEBUG
+    org.apache.kafka: INFO
 
 ---
 # Development Profile
@@ -110,6 +112,7 @@ logging:
   level:
     com.cloudinsight.anomalyservicerw: DEBUG
     org.springframework.kafka: DEBUG
+    org.apache.kafka: DEBUG
 
 ---
 # Production Profile
@@ -122,3 +125,4 @@ logging:
   level:
     root: WARN
     com.cloudinsight.anomalyservicerw: INFO
+    org.springframework.kafka: INFO
