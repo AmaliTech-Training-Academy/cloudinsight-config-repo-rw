@@ -21,7 +21,7 @@ spring:
     
     # Consumer Configuration
     consumer:
-      group-id: ${KAFKA_CONSUMER_GROUP:cloudinsight-anomaly-group}
+      group-id: cloudinsight-anomaly-group
       auto-offset-reset: earliest
       enable-auto-commit: false
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
