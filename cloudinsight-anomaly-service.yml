@@ -8,24 +8,20 @@ spring:
       uri: ${MONGODB_URI}
       auto-index-creation: true
 
-  # Kafka Configuration for Confluent Cloud
+  # Kafka Configuration - MUST be under spring.kafka for Spring Boot autoconfiguration
   kafka:
-    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
-
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    
     # Security Configuration (Required for Confluent Cloud)
     properties:
-      security.protocol: SASL_SSL
-      sasl.mechanism: PLAIN
-      sasl.jaas.config: >
-        org.apache.kafka.common.security.plain.PlainLoginModule required
-        username="${KAFKA_API_KEY}"
-        password="${KAFKA_API_SECRET}";
-      # SSL Configuration
+      security.protocol: ${KAFKA_SECURITY_PROTOCOL:PLAINTEXT}
+      sasl.mechanism: ${KAFKA_SASL_MECHANISM:PLAIN}
+      sasl.jaas.config: ${KAFKA_SASL_JAAS_CONFIG:}
       ssl.endpoint.identification.algorithm: https
-
+    
     # Consumer Configuration
     consumer:
-      group-id: ${KAFKA_CONSUMER_GROUP}
+      group-id: ${KAFKA_CONSUMER_GROUP:cloudinsight-anomaly-group}
       auto-offset-reset: earliest
       enable-auto-commit: false
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
@@ -33,10 +29,8 @@ spring:
       properties:
         spring.json.trusted.packages: "com.cloudinsight.events,com.cloudinsight.anomalyservicerw.events"
         spring.json.value.default.type: com.cloudinsight.events.ServiceCostComputedEvent
-      max.poll.records: 50
-      fetch.min.bytes: 1024
-      fetch.max.wait.ms: 500
-
+      max-poll-records: 50
+    
     # Producer Configuration (for publishing anomaly alerts)
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
@@ -46,20 +40,18 @@ spring:
       compression-type: snappy
       properties:
         enable.idempotence: true
-
+    
     # Listener Configuration
     listener:
       ack-mode: manual
       concurrency: 3
 
-# Anomaly Detection Configuration
+# Anomaly Detection Configuration (custom properties)
 anomaly:
   kafka:
-    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
-    consumer-group: cloudinsight-anomaly-group
     topic-cost: service.cost.computed
     topic-anomaly: anomaly.detected
-
+  
   model:
     base-path: ${MODEL_BASE_PATH:./models}
     default-filename: isolation_forest.model
@@ -69,13 +61,13 @@ anomaly:
     window-days: 90
     retrain-days: 7
     min-training-samples: 30
-
+  
   storage:
     serialize-format: java-serialization
-
+  
   executor:
     thread-pool-size: 4
-
+  
   validation:
     min-samples: 30
     max-zero-ratio: 0.7
@@ -90,8 +82,6 @@ management:
   endpoint:
     health:
       show-details: always
-    kafka:
-      enabled: true
 
 # Eureka Client
 eureka:
@@ -99,7 +89,7 @@ eureka:
     serviceUrl:
       defaultZone: ${SPRING_EUREKA_CLIENT_SERVICEURL_DEFAULTZONE}
   instance:
-    prefer-ip-address: ${EUREKA_CLIENT_INSTANCE_PREFER_IP_ADDRESS}
+    prefer-ip-address: ${EUREKA_CLIENT_INSTANCE_PREFER_IP_ADDRESS:true}
 
 # Logging
 logging:
