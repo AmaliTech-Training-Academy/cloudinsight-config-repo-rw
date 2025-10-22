@@ -14,18 +14,14 @@ spring:
   cache:
     type: redis
 
-  # RabbitMQ Configuration
+  # RabbitMQ Configuration (existing - keep)
   rabbitmq:
     host: ${RABBITMQ_HOST:localhost}
     port: ${RABBITMQ_PORT:5672}
     username: ${RABBITMQ_USERNAME:guest}
     password: ${RABBITMQ_PASSWORD:guest}
     virtual-host: ${RABBITMQ_VHOST:/}
-
-    # Connection settings
     connection-timeout: 30000
-
-    # Consumer settings
     listener:
       simple:
         retry:
@@ -34,15 +30,11 @@ spring:
           max-attempts: 3
           max-interval: 10000ms
           multiplier: 2.0
-        default-requeue-rejected: false # Send to DLQ instead of requeue
+        default-requeue-rejected: false
         acknowledge-mode: auto
         prefetch: 10
-
-    # Producer settings
     publisher-confirms: true
     publisher-returns: true
-
-    # Template settings
     template:
       mandatory: true
       retry:
@@ -50,6 +42,33 @@ spring:
         initial-interval: 1000ms
         max-attempts: 3
         max-interval: 5000ms
+
+  # Kafka Configuration (NEW - for Confluent Cloud)
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
+
+    # Security Configuration
+    properties:
+      security.protocol: SASL_SSL
+      sasl.mechanism: PLAIN
+      sasl.jaas.config: >
+        org.apache.kafka.common.security.plain.PlainLoginModule required
+        username="${KAFKA_API_KEY}"
+        password="${KAFKA_API_SECRET}";
+      ssl.endpoint.identification.algorithm: https
+
+    # Producer Configuration
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      acks: all
+      retries: 3
+      compression-type: snappy
+      properties:
+        enable.idempotence: true
+        max.in.flight.requests.per.connection: 5
+        linger.ms: 10
+        batch.size: 16384
 
 # Management & Health
 management:
@@ -60,6 +79,8 @@ management:
   endpoint:
     health:
       show-details: always
+    kafka:
+      enabled: true
 
 # Eureka Client
 eureka:
@@ -101,6 +122,14 @@ app:
     retry-interval-minutes: ${INGESTION_RETRY_INTERVAL:30}
     buffer-hours: ${INGESTION_BUFFER_HOURS:4}
 
+# Logging
+logging:
+  level:
+    root: INFO
+    com.cloudinsight.cloudinsightcostservicerw: DEBUG
+    org.springframework.kafka: INFO
+    org.apache.kafka: WARN
+
 # Profile-specific configurations
 ---
 spring:
@@ -113,7 +142,6 @@ spring:
       port: ${REDIS_PORT:6379}
   cache:
     type: redis
-  # RabbitMQ dev settings
   rabbitmq:
     host: ${RABBITMQ_HOST:localhost}
     username: ${RABBITMQ_USERNAME:dev_user}
@@ -122,6 +150,11 @@ spring:
 app:
   ingestion:
     schedule: ${INGESTION_SCHEDULE:0 */15 * * * *} # Every 15 minutes for dev
+
+logging:
+  level:
+    com.cloudinsight.cloudinsightcostservicerw: DEBUG
+    org.springframework.kafka: DEBUG
 
 ---
 spring:
@@ -134,7 +167,6 @@ spring:
       port: ${REDIS_PORT:6379}
   cache:
     type: redis
-  # RabbitMQ test settings (embedded or test container)
   rabbitmq:
     host: ${RABBITMQ_HOST:localhost}
     port: ${RABBITMQ_PORT:5673}
@@ -143,19 +175,18 @@ spring:
 
 app:
   phase-one-api:
-    base-url: http://localhost:8089 # WireMock for tests
+    base-url: http://localhost:8089
     auth-token: test-token
 
 eureka:
   client:
-    enabled: false # Disable Eureka for tests
+    enabled: false
 
 ---
 spring:
   config:
     activate:
       on-profile: prod
-  # RabbitMQ prod settings
   rabbitmq:
     host: ${RABBITMQ_HOST}
     port: ${RABBITMQ_PORT:5672}
@@ -166,4 +197,5 @@ spring:
 logging:
   level:
     root: WARN
-    '[com.cloudinsight.costs]': INFO
+    com.cloudinsight.cloudinsightcostservicerw: INFO
+    org.springframework.kafka: INFO
