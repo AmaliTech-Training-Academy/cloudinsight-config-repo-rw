@@ -27,7 +27,8 @@ spring:
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       properties:
-        spring.json.trusted.packages: "com.cloudinsight.events,com.cloudinsight.anomalyservicerw.events"
+        # spring.json.trusted.packages: "com.cloudinsight.events,com.cloudinsight.anomalyservicerw.events"
+        spring.json.trusted.packages: "*"
         spring.json.value.default.type: com.cloudinsight.anomalyservicerw.events.ServiceCostComputedEvent
       max-poll-records: 50
       fetch-min-size: 1024
